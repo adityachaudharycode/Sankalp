@@ -77,18 +77,34 @@ const DONATION_CONTRACT_ABI = [
 const CONTRACT_ADDRESS = import.meta.env.VITE_DONATION_CONTRACT_ADDRESS || '0x1234567890123456789012345678901234567890'
 
 // Polygon Mumbai Testnet configuration
+// const POLYGON_MUMBAI_CONFIG = {
+//   chainId: '0x13881',
+//   chainName: 'Polygon Mumbai Testnet',
+//   nativeCurrency: {
+//     name: 'MATIC',
+//     symbol: 'MATIC',
+//     decimals: 18
+//   },
+//   rpcUrls: ['https://rpc-mumbai.maticvigil.com/'],
+//   blockExplorerUrls: ['https://mumbai.polygonscan.com/']
+// }
+
+
+
+// Polygon Amoy Testnet configuration
+//since i did using polygon mumbai but its down so i used polygon amoy but names as polygon mumbai so that i should not change it everywhere
+
 const POLYGON_MUMBAI_CONFIG = {
-  chainId: '0x13881',
-  chainName: 'Polygon Mumbai Testnet',
+  chainId: '0x13882', // 80002 in hex
+  chainName: 'Polygon Amoy Testnet',
   nativeCurrency: {
     name: 'MATIC',
     symbol: 'MATIC',
     decimals: 18
   },
-  rpcUrls: ['https://rpc-mumbai.maticvigil.com/'],
-  blockExplorerUrls: ['https://mumbai.polygonscan.com/']
+  rpcUrls: ['https://rpc-amoy.polygon.technology/'],
+  blockExplorerUrls: ['https://www.oklink.com/amoy']
 }
-
 class BlockchainService {
   constructor() {
     this.provider = null
