@@ -1,2 +1,1 @@
-#see inside web .gitignore
-
+/web/.env
