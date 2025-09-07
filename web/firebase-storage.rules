@@ -1,0 +1,119 @@
+rules_version = '2';
+
+// Firebase Storage Security Rules for Sankalp Platform
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user owns the resource
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    // Helper function to check file size (max 10MB)
+    function isValidSize() {
+      return resource.size < 10 * 1024 * 1024;
+    }
+    
+    // Helper function to check if file is an image
+    function isImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+    
+    // NGO Image Submissions
+    // Path: ngo_submissions/{userId}-{timestamp}-{filename}
+    match /ngo_submissions/{allPaths=**} {
+      // Allow authenticated users to upload images
+      allow create: if isAuthenticated() 
+                    && isImage() 
+                    && request.resource.size < 10 * 1024 * 1024;
+      
+      // Allow authenticated users to read all NGO submissions
+      allow read: if isAuthenticated();
+      
+      // Allow the uploader to delete their own files
+      allow delete: if isAuthenticated() 
+                    && resource.metadata.keys().hasAll(['uploadedBy']) 
+                    && resource.metadata.uploadedBy == request.auth.uid;
+    }
+    
+    // Public Issue Images
+    // Path: issues/{userId}-{timestamp}-{filename}
+    match /issues/{allPaths=**} {
+      // Allow authenticated users to upload issue images
+      allow create: if isAuthenticated() 
+                    && isImage() 
+                    && request.resource.size < 10 * 1024 * 1024;
+      
+      // Allow anyone to read issue images (for public viewing)
+      allow read: if true;
+      
+      // Allow the uploader to delete their own files
+      allow delete: if isAuthenticated() 
+                    && resource.metadata.keys().hasAll(['uploadedBy']) 
+                    && resource.metadata.uploadedBy == request.auth.uid;
+    }
+    
+    // Profile Images
+    // Path: profiles/{userId}/{filename}
+    match /profiles/{userId}/{allPaths=**} {
+      // Allow users to upload their own profile images
+      allow create, update: if isAuthenticated() 
+                           && isOwner(userId) 
+                           && isImage() 
+                           && request.resource.size < 5 * 1024 * 1024;
+      
+      // Allow anyone to read profile images
+      allow read: if true;
+      
+      // Allow users to delete their own profile images
+      allow delete: if isAuthenticated() && isOwner(userId);
+    }
+    
+    // School Documents and Images
+    // Path: schools/{schoolId}/{filename}
+    match /schools/{schoolId}/{allPaths=**} {
+      // Allow authenticated users to upload school-related files
+      allow create: if isAuthenticated() 
+                    && (isImage() || request.resource.contentType.matches('application/pdf'))
+                    && request.resource.size < 15 * 1024 * 1024;
+      
+      // Allow authenticated users to read school files
+      allow read: if isAuthenticated();
+      
+      // Allow school admins to delete (you can add more specific rules here)
+      allow delete: if isAuthenticated();
+    }
+    
+    // Government Documents
+    // Path: government/{filename}
+    match /government/{allPaths=**} {
+      // Only allow government users to upload (you can add role checking here)
+      allow create, update: if isAuthenticated() 
+                           && request.resource.size < 20 * 1024 * 1024;
+      
+      // Allow authenticated users to read government documents
+      allow read: if isAuthenticated();
+      
+      // Only government users can delete
+      allow delete: if isAuthenticated();
+    }
+    
+    // Temporary/Test uploads (for development)
+    // Path: temp/{filename}
+    match /temp/{allPaths=**} {
+      // Allow any authenticated user to upload to temp folder
+      allow create, read, update, delete: if isAuthenticated() 
+                                          && request.resource.size < 10 * 1024 * 1024;
+    }
+    
+    // Default rule - deny all other access
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

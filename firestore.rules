@@ -1,0 +1,158 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can read/write their own profile
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null && 
+        (resource.data.role == 'ngo' || resource.data.role == 'volunteer' || resource.data.role == 'government');
+    }
+    
+    // Issues - public can create, NGOs can read/update, government can read all
+    match /issues/{issueId} {
+      allow create: if request.auth != null && request.auth.uid == resource.data.reporterUid;
+      allow read: if request.auth != null;
+      allow update: if request.auth != null && 
+        (request.auth.token.role == 'ngo' || request.auth.token.role == 'volunteer' || request.auth.token.role == 'government');
+    }
+    
+    // School classes - only school can manage their own
+    match /schoolClasses/{classId} {
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.schoolId;
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.schoolId;
+      allow read: if request.auth != null && request.auth.token.role == 'government';
+    }
+    
+    // Students - only school can manage their own students
+    match /students/{studentId} {
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.schoolId;
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.schoolId;
+      allow read: if request.auth != null && request.auth.token.role == 'government';
+    }
+
+    // Daily attendance - only school can manage their own
+    match /dailyAttendance/{attendanceId} {
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.schoolId;
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.schoolId;
+      allow read: if request.auth != null && request.auth.token.role == 'government';
+    }
+
+    // Image analysis - only school can manage their own
+    match /imageAnalysis/{analysisId} {
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.schoolId;
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.schoolId;
+      allow read: if request.auth != null && request.auth.token.role == 'government';
+    }
+
+    // Legacy collections for backward compatibility
+    // School attendance - only school can manage their own
+    match /schoolAttendance/{attendanceId} {
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.schoolId;
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.schoolId;
+      allow read: if request.auth != null && request.auth.token.role == 'government';
+    }
+
+    // School meals - only school can manage their own
+    match /schoolMeals/{mealId} {
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.schoolId;
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.schoolId;
+      allow read: if request.auth != null && request.auth.token.role == 'government';
+    }
+
+    // BMI records - only school can manage their own
+    match /bmiRecords/{bmiId} {
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.schoolId;
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.schoolId;
+      allow read: if request.auth != null && request.auth.token.role == 'government';
+    }
+    
+    // Awareness programs - NGOs can create, all can read
+    match /awarenessPrograms/{programId} {
+      allow create: if request.auth != null && 
+        (request.auth.token.role == 'ngo' || request.auth.token.role == 'volunteer');
+      allow read: if request.auth != null;
+      allow update: if request.auth != null && request.auth.uid == resource.data.organizerUid;
+    }
+  }
+}
+
+
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Users can read/write their own profile
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null && 
+        (resource.data.role == 'ngo' || resource.data.role == 'volunteer' || resource.data.role == 'government');
+    }
+    
+    // Issues - public can create, NGOs can read/update, government can read all
+    match /issues/{issueId} {
+      allow create: if request.auth != null && request.resource.data.reporterUid == request.auth.uid;
+      allow read: if request.auth != null;
+      allow update: if request.auth != null && 
+        (request.auth.token.role == 'ngo' || request.auth.token.role == 'volunteer' || request.auth.token.role == 'government');
+    }
+    
+    // School classes - only school can manage their own
+    match /schoolClasses/{classId} {
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.schoolId;
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.schoolId;
+      allow read: if request.auth != null && request.auth.token.role == 'government';
+    }
+    
+    // Students - only school can manage their own students
+    match /students/{studentId} {
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.schoolId;
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.schoolId;
+      allow read: if request.auth != null && request.auth.token.role == 'government';
+    }
+
+    // Daily attendance - only school can manage their own
+    match /dailyAttendance/{attendanceId} {
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.schoolId;
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.schoolId;
+      allow read: if request.auth != null && request.auth.token.role == 'government';
+    }
+
+    // Image analysis - only school can manage their own
+    match /imageAnalysis/{analysisId} {
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.schoolId;
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.schoolId;
+      allow read: if request.auth != null && request.auth.token.role == 'government';
+    }
+
+    // Legacy collections for backward compatibility
+    // School attendance - only school can manage their own
+    match /schoolAttendance/{attendanceId} {
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.schoolId;
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.schoolId;
+      allow read: if request.auth != null && request.auth.token.role == 'government';
+    }
+
+    // School meals - only school can manage their own
+    match /schoolMeals/{mealId} {
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.schoolId;
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.schoolId;
+      allow read: if request.auth != null && request.auth.token.role == 'government';
+    }
+
+    // BMI records - only school can manage their own
+    match /bmiRecords/{bmiId} {
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.schoolId;
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.schoolId;
+      allow read: if request.auth != null && request.auth.token.role == 'government';
+    }
+    
+    // Awareness programs - NGOs can create, all can read
+    match /awarenessPrograms/{programId} {
+      allow create: if request.auth != null && 
+        (request.auth.token.role == 'ngo' || request.auth.token.role == 'volunteer');
+      allow read: if request.auth != null;
+      allow update: if request.auth != null && request.auth.uid == resource.data.organizerUid;
+    }
+  }
+}
